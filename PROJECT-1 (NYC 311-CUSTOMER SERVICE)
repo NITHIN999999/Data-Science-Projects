@@ -1,0 +1,698 @@
+
+PROJECT-1
+DESCRIPTION
+Background of Problem Statement :
+NYC 311's mission is to provide the public with quick and easy access to all New York City government services and information while offering the best customer service. Each day, NYC311 receives thousands of requests related to several hundred types of non-emergency services, including noise complaints, plumbing issues, and illegally parked cars. These requests are received by NYC311 and forwarded to the relevant agencies such as the police, buildings, or transportation. The agency responds to the request, addresses it, and then closes it.
+Problem Objective :
+Perform a service request data analysis of New York City 311 calls. You will focus on the data wrangling techniques to understand the pattern in the data and also visualize the major complaint types.
+Domain: Customer Service
+Analysis Tasks to be performed:
+(Perform a service request data analysis of New York City 311 calls) 
+1.	Import a 311 NYC service request.
+2.	Read or convert the columns ‘Created Date’ and Closed Date’ to datetime datatype and create a new column ‘Request_Closing_Time’ as the time elapsed between request creation and request closing. (Hint: Explore the package/module datetime)
+3.	Provide major insights/patterns that you can offer in a visual format (graphs or tables); at least 4 major conclusions that you can come up with after generic data mining.
+4.	Order the complaint types based on the average ‘Request_Closing_Time’, grouping them for different locations.
+5.	Perform a statistical test for the following:
+Please note: For the below statements you need to state the Null and Alternate and then provide a statistical test to accept or reject the Null Hypothesis along with the corresponding ‘p-value’.
+•	Whether the average response time across complaint types is similar or not (overall)
+•	Are the type of complaint or service requested and location related?
+Field	Description
+Unique Key	(Plain text) - Unique identifier for the complaints
+Created Date	(Date and Time) - The date and time on which the complaint is raised
+Closed Date	(Date and Time)  - The date and time on which the complaint is closed
+Agency	(Plain text) - Agency code
+Agency Name	(Plain text) - Name of the agency
+Complaint Type	(Plain text) - Type of the complaint
+Descriptor	(Plain text) - Complaint type label (Heating - Heat, 
+Traffic Signal Condition - Controller)
+Location Type	(Plain text) - Type of the location (Residential, Restaurant, 
+Bakery, etc)
+Incident Zip	(Plain text) - Zip code for the location
+Incident Address	(Plain text) - Address of the location
+Street Name	(Plain text) - Name of the street
+Cross Street 1	(Plain text) - Detail of cross street
+Cross Street 2	(Plain text) - Detail of another cross street
+Intersection Street 1	(Plain text) - Detail of intersection street if any
+Intersection Street 2	(Plain text) - Detail of another intersection street if any
+Address Type	(Plain text) - Categorical (Address or Intersection)
+City	(Plain text) - City for the location
+Landmark	(Plain text) - Empty field
+Facility Type	(Plain text) - N/A
+Status	(Plain text) - Categorical (Closed or Pending)
+Due Date	(Date and Time) - Date and time for the pending complaints
+Resolution Action Updated Date	(Date and Time) - Date and time when the resolution was provided
+Community Board	(Plain text) - Categorical field (specifies the community board with its code)
+Borough	(Plain text) - Categorical field (specifies the community board)
+X Coordinate	(State Plane) (Number)
+Y Coordinate	(State Plane) (Number)
+Park Facility Name	(Plain text) - Unspecified
+Park Borough	(Plain text) - Categorical (Unspecified, Queens, Brooklyn etc)
+School Name	(Plain text) - Unspecified
+School Number	(Plain text)  - Unspecified
+School Region	(Plain text)  - Unspecified
+School Code	(Plain text)  - Unspecified
+School Phone Number	(Plain text)  - Unspecified
+School Address	(Plain text)  - Unspecified
+School City	(Plain text)  - Unspecified
+School State	(Plain text)  - Unspecified
+School Zip	(Plain text)  - Unspecified
+School Not Found	(Plain text)  - Empty Field
+School or Citywide Complaint	(Plain text)  - Empty Field
+Vehicle Type	(Plain text)  - Empty Field
+Taxi Company Borough	(Plain text)  - Empty Field
+Taxi Pick Up Location	(Plain text)  - Empty Field
+Bridge Highway Name	(Plain text)  - Empty Field
+Bridge Highway Direction	(Plain text)  - Empty Field
+Road Ramp	(Plain text)  - Empty Field
+Bridge Highway Segment	(Plain text)  - Empty Field
+Garage Lot Name	(Plain text)  - 
+Empty Field
+ 
+Ferry Direction	(Plain text)  - Empty Field
+Ferry Terminal Name	(Plain text)  - Empty Field
+Latitude	(Number) - Latitude of the location
+Longitude	(Number) - Longitude of the location
+Location	(Location) - Coordinates (Latitude, Longitude)
+ANSWERS:
+
+
+
+import pandas as pd
+import numpy as np
+import datetime
+#Import required libraries
+import matplotlib.pyplot as plt
+import seaborn as sns 
+%matplotlib inline
+NYC311=pd.read_csv("311_Service_Requests_from_2010_to_Present.csv")
+NYC311.head() # Gives initial Five records
+ 
+# for identifying number of rows and columns
+
+NYC311.shape 
+(300698, 53)
+
+# for identifying column-names
+Index(['Unique Key', 'Created Date', 'Closed Date', 'Agency', 'Agency Name',
+       'Complaint Type', 'Descriptor', 'Location Type', 'Incident Zip',
+       'Incident Address', 'Street Name', 'Cross Street 1', 'Cross Street 2',
+       'Intersection Street 1', 'Intersection Street 2', 'Address Type',
+       'City', 'Landmark', 'Facility Type', 'Status', 'Due Date',
+       'Resolution Description', 'Resolution Action Updated Date',
+       'Community Board', 'Borough', 'X Coordinate (State Plane)',
+       'Y Coordinate (State Plane)', 'Park Facility Name', 'Park Borough',
+       'School Name', 'School Number', 'School Region', 'School Code',
+       'School Phone Number', 'School Address', 'School City', 'School State',
+       'School Zip', 'School Not Found', 'School or Citywide Complaint',
+       'Vehicle Type', 'Taxi Company Borough', 'Taxi Pick Up Location',
+       'Bridge Highway Name', 'Bridge Highway Direction', 'Road Ramp',
+       'Bridge Highway Segment', 'Garage Lot Name', 'Ferry Direction',
+       'Ferry Terminal Name', 'Latitude', 'Longitude', 'Location'],
+      dtype='object')
+
+# for identifying unique complaint types
+NYC311['Complaint Type'].unique()
+array(['Noise - Street/Sidewalk', 'Blocked Driveway', 'Illegal Parking',
+       'Derelict Vehicle', 'Noise - Commercial',
+       'Noise - House of Worship', 'Posting Advertisement',
+       'Noise - Vehicle', 'Animal Abuse', 'Vending', 'Traffic',
+       'Drinking', 'Bike/Roller/Skate Chronic', 'Panhandling',
+       'Noise - Park', 'Homeless Encampment', 'Urinating in Public',
+       'Graffiti', 'Disorderly Youth', 'Illegal Fireworks',
+       'Ferry Complaint', 'Agency Issues', 'Squeegee', 'Animal in a Park'],
+      dtype=object)
+# for getting unique descriptors
+NYC311['Descriptor'].unique()
+array(['Loud Music/Party', 'No Access', 'Commercial Overnight Parking',
+       'Blocked Sidewalk', 'Posted Parking Sign Violation',
+       'Blocked Hydrant', 'With License Plate', 'Partial Access',
+       'Unauthorized Bus Layover', 'Double Parked Blocking Vehicle',
+       'Double Parked Blocking Traffic', 'Vehicle', 'Loud Talking',
+       'Banging/Pounding', 'Car/Truck Music', 'Tortured',
+       'In Prohibited Area', 'Congestion/Gridlock', 'Neglected',
+       'Car/Truck Horn', 'In Public', 'Other (complaint details)', nan,
+       'No Shelter', 'Truck Route Violation', 'Unlicensed',
+       'Overnight Commercial Storage', 'Engine Idling',
+       'After Hours - Licensed Est', 'Detached Trailer',
+       'Underage - Licensed Est', 'Chronic Stoplight Violation',
+       'Loud Television', 'Chained', 'Building', 'In Car',
+       'Police Report Requested', 'Chronic Speeding',
+       'Playing in Unsuitable Place', 'Drag Racing',
+       'Police Report Not Requested', 'Nuisance/Truant', 'Homeless Issue',
+       'Language Access Complaint', 'Disruptive Passenger',
+       'Animal Waste'], dtype=object)
+
+# checking the number of Missing Values
+NYC311.isnull().sum()
+Unique Key                             0
+Created Date                           0
+Closed Date                         2164
+Agency                                 0
+Agency Name                            0
+Complaint Type                         0
+Descriptor                          5914
+Location Type                        131
+Incident Zip                        2615
+Incident Address                   44410
+Street Name                        44410
+Cross Street 1                     49279
+Cross Street 2                     49779
+Intersection Street 1             256840
+Intersection Street 2             257336
+Address Type                        2815
+City                                2614
+Landmark                          300349
+Facility Type                       2171
+Status                                 0
+Due Date                               3
+Resolution Description                 0
+Resolution Action Updated Date      2187
+Community Board                        0
+Borough                                0
+X Coordinate (State Plane)          3540
+Y Coordinate (State Plane)          3540
+Park Facility Name                     0
+Park Borough                           0
+School Name                            0
+School Number                          0
+School Region                          1
+School Code                            1
+School Phone Number                    0
+School Address                         0
+School City                            0
+School State                           0
+School Zip                             1
+School Not Found                       0
+School or Citywide Complaint      300698
+Vehicle Type                      300698
+Taxi Company Borough              300698
+Taxi Pick Up Location             300698
+Bridge Highway Name               300455
+Bridge Highway Direction          300455
+Road Ramp                         300485
+Bridge Highway Segment            300485
+Garage Lot Name                   300698
+Ferry Direction                   300697
+Ferry Terminal Name               300696
+Latitude                            3540
+Longitude                           3540
+Location                            3540
+dtype: int64
+
+# Closed Date is an important column and have many missing values
+NYC311[NYC311['Closed Date'].isnull()]
+ 
+# For our future exploration on "Closed Date column" noted down 1 row by its "unique key "column to cross-check changes everytime we do something for "Closed Date "or related column
+NYC311[NYC311['Unique Key'] == 32305700]
+ 
+# We check data type of each column
+NYC311.dtypes
+Unique Key                          int64
+Created Date                       object
+Closed Date                        object
+Agency                             object
+Agency Name                        object
+Complaint Type                     object
+Descriptor                         object
+Location Type                      object
+Incident Zip                      float64
+Incident Address                   object
+Street Name                        object
+Cross Street 1                     object
+Cross Street 2                     object
+Intersection Street 1              object
+Intersection Street 2              object
+Address Type                       object
+City                               object
+Landmark                           object
+Facility Type                      object
+Status                             object
+Due Date                           object
+Resolution Description             object
+Resolution Action Updated Date     object
+Community Board                    object
+Borough                            object
+X Coordinate (State Plane)        float64
+Y Coordinate (State Plane)        float64
+Park Facility Name                 object
+Park Borough                       object
+School Name                        object
+School Number                      object
+School Region                      object
+School Code                        object
+School Phone Number                object
+School Address                     object
+School City                        object
+School State                       object
+School Zip                         object
+School Not Found                   object
+School or Citywide Complaint      float64
+Vehicle Type                      float64
+Taxi Company Borough              float64
+Taxi Pick Up Location             float64
+Bridge Highway Name                object
+Bridge Highway Direction           object
+Road Ramp                          object
+Bridge Highway Segment             object
+Garage Lot Name                   float64
+Ferry Direction                    object
+Ferry Terminal Name                object
+Latitude                          float64
+Longitude                         float64
+Location                           object
+dtype: object
+
+# Question 2.) Read or convert the columns ‘Created Date’ and Closed Date’ to datetime datatype and create a new column ‘Request_Closing_Time’ as the time elapsed between request creation and request closing. (Hint: Explore the package/module datetime)
+
+# Solution 2
+import datetime as dt
+import time, datetime
+
+# Convert "Closed Date" to datetime dtype
+NYC311['Closed Date'] = pd.to_datetime(NYC311['Closed Date'])
+NYC311['Closed Date'].dtype
+dtype('<M8[ns]')
+
+# Convert "Created Date" to datetime dtype
+NYC311['Created Date'] = pd.to_datetime(NYC311['Created Date'])
+NYC311['Created Date'].dtype
+dtype('<M8[ns]')
+
+type(NYC311)
+pandas.core.frame.DataFrame
+
+# Creating a new column named Request_Closing_Time with time taken to close complain
+NYC311['Request_Closing_Time'] = NYC311['Closed Date'] - NYC311['Created Date']
+
+NYC311['Request_Closing_Time'].head()
+0   00:55:15
+1   01:26:16
+2   04:51:31
+3   07:45:14
+4   03:27:02
+Name: Request_Closing_Time, dtype: timedelta64[ns]
+
+QUESTION 3:- PROVIDE MAJOR INSIGHTS/PATTERNS THAT YOU CAN OFFER IN A VISUAL FORMAT (GRAPHS OR TABLES); AT LEAST 4 MAJOR CONCLUSIONS THAT YOU CAN COME UP WITH AFTER GENERIC DATA MINING.
+SOLUTION 3
+FROM HERE STARTING INSIGHT
+INSIGHT - 1 - CATEGORIZE REQUEST_CLOSING_TIME AS FOLLOWS -
+BELOW 2 HOURS - FAST
+BETWEEN 2 TO 4 HOURS - ACCEPTABLE
+BETWEEN 4 TO 6 - SLOW, MORE THAN 6 HOURS - VERY SLOW
+FOR THIS, FIRST WILL CREATE NEW COLUMN "REQUEST_CLOSING_IN_HR" AND THEN CREATE NEW COLUMN - "REQUEST_CLOSING_TIME_CATEGORY"
+FUNCTION TO CONVERT TIME-DELAYS IN HOUR
+
+
+
+# Function to convert Time Delays in Hour
+def toHr(timeDel):
+    days = timeDel.days
+    hours = round(timeDel.seconds/3600, 2)
+    result = (days * 24) + hours
+    #print(days)
+    #print(hours)
+    return result
+    #return round(pd.Time-delays(timeDel).seconds / 3600, 2)
+
+#Testing of function with days
+test_days = NYC311[NYC311['Unique Key'] == 32122264]['Request_Closing_Time']
+print(toHr(test_days[27704]))
+print(test_days[27704])
+print(test_days.dtype)
+
+145.08
+6 days 01:05:00
+timedelta64[ns]
+
+# Apply this function to every row of column Request_Closing_Time
+NYC311['Request_Closing_In_Hr'] = NYC311['Request_Closing_Time'].apply(toHr)
+NYC311['Request_Closing_In_Hr'].head()
+0    0.92
+1    1.44
+2    4.86
+3    7.75
+4    3.45
+Name: Request_Closing_In_Hr, dtype: float64
+import math
+# Function to categorize hours - Less than 2 hours - Fast, Between 2 to 4 hours - Acceptable, Between 4 to 6 - Slow, More than 6 hours - Very Slow
+def hr_To_Category(hr):
+    if (math.isnan(hr)):
+        return 'Unspecified'
+    elif (hr < 2.0):
+        return 'Fast'
+    elif (4.0 > hr >= 2.0):
+        return 'Acceptable'
+    elif (6.0 > hr >= 4.0):
+        return 'Slow'
+    else:
+        return 'Very Slow'
+# Testing function
+print(hr_To_Category(1.99))
+
+# Create new column "Request_Closing_Time_Category" and apply function on "column Request_Closing_In_Hr"
+
+NYC311['Request_Closing_Time_Category'] = NYC311['Request_Closing_In_Hr'].apply(hrToCategory)
+
+NYC311['Request_Closing_Time_Category'].head()
+
+
+Fast
+
+0          Fast
+1          Fast
+2          Slow
+3     Very Slow
+4    Acceptable
+Name: Request_Closing_Time_Category, dtype: object
+
+NYC311['Request_Closing_Time_Category'].value_counts()
+
+# Create Bar plot for Request_Closing_Time_Category to check frequency in Request_Closing_Time_Category and it prove Most count is in Fast category means closed less than 2 hours
+
+NYC311['Request_Closing_Time_Category'].value_counts().plot(kind="barh", color=list('kymcrgb'), alpha=0.7, figsize=(15,3))
+plt.show()
+
+ 
+# Insight 4
+# Let's check count for status type
+NYC311['Status'].value_counts()
+Closed      298471
+Open          1439
+Assigned       786
+Draft            2
+Name: Status, dtype: int64
+
+
+# Draw Bar lot for Status
+from matplotlib import style
+style.use('ggplot')
+NYC311['Status'].value_counts().plot(kind='bar', color=list('kymcrgb'))
+plt.show()
+ 
+QUESTION 4.: ORDER THE COMPLAINT TYPES BASED ON THE AVERAGE ‘REQUEST_CLOSING_TIME’, GROUPING THEM FOR DIFFERENT LOCATIONS.
+SOLUTION 4:
+# For location we can choose here City, so first check if there is missing values there
+NYC311['City'].isnull().sum()
+2614
+
+# Fill all missing value with some default value here i used - Not Available
+NYC311['City'].fillna('Not Available', inplace=True)
+NYC311['City'].head()
+
+
+0    NEW YORK
+1     ASTORIA
+2       BRONX
+3       BRONX
+4    ELMHURST
+Name: City, dtype: object
+
+NYC311['City']
+0              NEW YORK
+1               ASTORIA
+2                 BRONX
+3                 BRONX
+4              ELMHURST
+              ...      
+300693    Not Available
+300694    RICHMOND HILL
+300695         BROOKLYN
+300696            BRONX
+300697         NEW YORK
+Name: City, Length: 300698, dtype: object
+
+# Group them for City (location) first and Complain Type in that
+NYC311_grouped = NYC311.groupby(['City', 'Complaint Type'])
+# get average of this grouped dataframe, and get Request_Closing_Time column from there
+NYC311_mean = NYC311_grouped.mean()['Request_Closing_In_Hr']
+NYC311_mean.isnull().sum()
+4
+
+# Group by City(location) first and then Complain Type and showing average of Request Closing in Hour
+NYC311_grouped  = NYC311.groupby(['City','Complaint Type']).agg({'Request_Closing_In_Hr': 'mean'})
+NYC311_grouped
+
+	Request_Closing_In_Hr
+City	Complaint Type	
+ARVERNE	Animal Abuse	2.153158
+	Blocked Driveway	2.526000
+	Derelict Vehicle	2.968889
+	Disorderly Youth	3.595000
+	Drinking	0.240000
+...	...	...
+Woodside	Blocked Driveway	6.405455
+	Derelict Vehicle	4.965000
+	Illegal Parking	5.219500
+	Noise - Commercial	2.390000
+	Noise - Street/Sidewalk	3.410000
+782 rows × 1 columns
+
+# Check if any value is NaN
+NYC311_grouped[NYC311_grouped['Request_Closing_In_Hr'].isnull()]
+
+ 
+# Check total rows
+print(NYC311_grouped)
+                                  Request_Closing_In_Hr
+City     Complaint Type                                
+ARVERNE  Animal Abuse                          2.153158
+         Blocked Driveway                      2.526000
+         Derelict Vehicle                      2.968889
+         Disorderly Youth                      3.595000
+         Drinking                              0.240000
+...                                                 ...
+Woodside Blocked Driveway                      6.405455
+         Derelict Vehicle                      4.965000
+         Illegal Parking                       5.219500
+         Noise - Commercial                    2.390000
+         Noise - Street/Sidewalk               3.410000
+
+[782 rows x 1 columns]
+In [68]:
+# drop null values from this group
+NYC311_grouped_withoutna = NYC311_grouped.dropna()
+# verify if new group has null values
+NYC311_grouped_withoutna.isnull().sum()
+Request_Closing_In_Hr    0
+dtype: int64
+
+# verify number of rows after dropping null values
+print(NYC311_grouped_withoutna)
+                                  Request_Closing_In_Hr
+City     Complaint Type                                
+ARVERNE  Animal Abuse                          2.153158
+         Blocked Driveway                      2.526000
+         Derelict Vehicle                      2.968889
+         Disorderly Youth                      3.595000
+         Drinking                              0.240000
+...                                                 ...
+Woodside Blocked Driveway                      6.405455
+         Derelict Vehicle                      4.965000
+         Illegal Parking                       5.219500
+         Noise - Commercial                    2.390000
+         Noise - Street/Sidewalk               3.410000
+
+[778 rows x 1 columns]
+
+# Sorting by column - Request_Closing_In_Hr for City on grouped
+NYC311_sorted = NYC311_grouped_withoutna.sort_values(['City', 'Request_Closing_In_Hr'])
+NYC311_sorted
+
+
+	Request_Closing_In_Hr
+City	Complaint Type	
+ARVERNE	Drinking	0.240000
+	Vending	0.480000
+	Urinating in Public	0.690000
+	Panhandling	1.030000
+	Noise - Park	1.285000
+...	...	...
+Woodside	Noise - Commercial	2.390000
+	Noise - Street/Sidewalk	3.410000
+	Derelict Vehicle	4.965000
+	Illegal Parking	5.219500
+	Blocked Driveway	6.405455
+778 rows × 1 columns
+
+QUESTION 5: PERFORM A STATISTICAL TEST FOR THE FOLLOWING:¶
+PLEASE NOTE: FOR THE BELOW STATEMENTS YOU NEED TO STATE THE NULL AND
+ALTERNATE AND THEN PROVIDE A STATISTICAL TEST TO ACCEPT OR REJECT THE NULL HYPOTHESIS ALONG WITH THE CORRESPONDING ‘P-VALUE’.
+WHETHER THE AVERAGE RESPONSE TIME ACROSS COMPLAINT TYPES IS SIMILAR OR NOT (OVERALL)
+ARE THE TYPE OF COMPLAINT OR SERVICE REQUESTED AND LOCATION RELATED?
+
+import scipy.stats as stats
+from math import sqrt
+##### Try ANOVA for first one
+# H0 : The average response time for all complaint types is similar
+# H1 : The average response time for all complaint types is not similar
+NYC311['Complaint Type'].value_counts()
+Blocked Driveway             77044
+Illegal Parking              75361
+Noise - Street/Sidewalk      48612
+Noise - Commercial           35577
+Derelict Vehicle             17718
+Noise - Vehicle              17083
+Animal Abuse                  7778
+Traffic                       4498
+Homeless Encampment           4416
+Noise - Park                  4042
+Vending                       3802
+Drinking                      1280
+Noise - House of Worship       931
+Posting Advertisement          650
+Urinating in Public            592
+Bike/Roller/Skate Chronic      427
+Panhandling                    307
+Disorderly Youth               286
+Illegal Fireworks              168
+Graffiti                       113
+Agency Issues                    6
+Squeegee                         4
+Ferry Complaint                  2
+Animal in a Park                 1
+Name: Complaint Type, dtype: int64
+
+top5_complaints_type = NYC311['Complaint Type'].value_counts()[:5]
+top5_complaints_type
+Blocked Driveway           77044
+Illegal Parking            75361
+Noise - Street/Sidewalk    48612
+Noise - Commercial         35577
+Derelict Vehicle           17718
+Name: Complaint Type, dtype: int64
+
+top5_complaints_type_names = top5_complaints_type.index
+top5_complaints_type_names
+Index(['Blocked Driveway', 'Illegal Parking', 'Noise - Street/Sidewalk',
+       'Noise - Commercial', 'Derelict Vehicle'],
+      dtype='object')
+
+sample_data = NYC311.loc[NYC311['Complaint Type'].isin(top5_complaints_type_names), ['Complaint Type', 'Request_Closing_In_Hr']]
+sample_data.head()
+
+ 
+
+sample_data.shape
+(254312, 2)
+sample_data.isnull().sum()
+Complaint Type              0
+Request_Closing_In_Hr    2059
+dtype: int64
+
+#sample_data[~sample_data.isin(['NaN', 'NaT']).any(axis=1)]
+#sample_data[sample_data.isnull()]
+
+sample_data.dropna(how='any', inplace=True)
+sample_data.isnull().sum()
+# sample_data_without_null[sample_data_without_null.isnull()]
+Complaint Type           0
+Request_Closing_In_Hr    0
+dtype: int64
+
+sample_data.shape
+(252253, 2)
+
+s1 = sample_data[sample_data['Complaint Type'] == top5_complaints_type_names[0]].Request_Closing_In_Hr
+s1.head()
+1     1.44
+2     4.86
+7     1.80
+9     1.38
+10    7.80
+Name: Request_Closing_In_Hr, dtype: float64
+
+s2 = sample_data[sample_data['Complaint Type'] == top5_complaints_type_names[1]].Request_Closing_In_Hr
+s2.head()
+
+3    7.75
+4    3.45
+5    1.89
+6    1.96
+8    8.55
+Name: Request_Closing_In_Hr, dtype: float64
+
+s3 = sample_data[sample_data['Complaint Type'] == top5_complaints_type_names[2]].Request_Closing_In_Hr
+s3.head()
+0     0.92
+12    2.48
+19    0.78
+38    0.49
+54    1.50
+Name: Request_Closing_In_Hr, dtype: float64
+
+s4 = sample_data[sample_data['Complaint Type'] == top5_complaints_type_names[3]].Request_Closing_In_Hr
+s4.head()
+17    0.85
+18    2.93
+22    1.26
+29    2.50
+30    1.99
+Name: Request_Closing_In_Hr, dtype: float64
+In [86]:
+s5 = sample_data[sample_data['Complaint Type'] == top5_complaints_type_names[4]].Request_Closing_In_Hr
+s5.head()
+14     10.49
+151     3.95
+255     1.36
+256     4.13
+295     0.75
+Name: Request_Closing_In_Hr, dtype: float64
+
+print(s1.isnull().sum())
+print(s2.isnull().sum())
+print(s3.isnull().sum())
+print(s4.isnull().sum())
+print(s5.isnull().sum())
+0
+0
+0
+0
+0
+
+stats.f_oneway(s1, s2, s3, s4, s5)
+
+
+F_onewayResult(statistic=1799.598683238952, pvalue=0.0)
+
+RESULT: WE CAN SEE PVALUE IS LESS THAN 0.05 SO WE REJECT NULL HYPOTHESIS AND AVERAGE RESPONSE TIME IS NOT SAME.
+
+### Try ChiSquare Test for second one - 
+# Are the type of complaint or service requested and location related?
+
+# H0 : 2 categories - Complain Type and Location is independent means not related
+# Ha : 2 categories - Complain Type and Location is dependent means related
+top5_location = NYC311['City'].value_counts()[:5]
+top5_location
+BROOKLYN         98307
+NEW YORK         65994
+BRONX            40702
+STATEN ISLAND    12343
+JAMAICA           7296
+Name: City, dtype: int64
+
+
+
+top5_location_names = top5_location.index
+top5_location_names
+Index(['BROOKLYN', 'NEW YORK', 'BRONX', 'STATEN ISLAND', 'JAMAICA'], dtype='object')
+
+sample_data_location_c_type = NYC311.loc[(NYC311['Complaint Type'].isin(top5_complaints_type_names)) & (NYC311['City'].isin(top5_location_names)), ['Complaint Type', 'City']]
+sample_data_location_c_type.head()
+ 
+pd.crosstab(sample_data_location_c_type['Complaint Type'], sample_data_location_c_type['City'], margins=True)
+City	BRONX	BROOKLYN	JAMAICA	NEW YORK	STATEN ISLAND	All
+Complaint Type						
+Blocked Driveway	12755	28148	2818	2072	2142	47935
+Derelict Vehicle	1953	5181	954	537	1766	10391
+Illegal Parking	7859	27462	1421	12128	4886	53756
+Noise - Commercial	2434	11463	429	14550	678	29554
+Noise - Street/Sidewalk	8892	13356	339	20433	819	43839
+All	33893	85610	5961	49720	10291	185475
+
+ch2, p_value, df, exp_frq = stats.chi2_contingency(pd.crosstab(sample_data_location_c_type['Complaint Type'], sample_data_location_c_type['City']))
+print(ch2)
+print(p_value)
+40522.79928349593
+0.0
+
+RESULT: # We can see pvalue is less than 0.05 so we reject null hypothesis means complain type and location is not independent.
