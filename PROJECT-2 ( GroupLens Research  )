@@ -1,0 +1,312 @@
+PROJECT-2
+
+DESCRIPTION
+Background of Problem Statement :
+The GroupLens Research Project is a research group in the Department of Computer Science and Engineering at the University of Minnesota. Members of the GroupLens Research Project are involved in many research projects related to the fields of information filtering, collaborative filtering, and recommender systems. The project is led by professors John Riedl and Joseph Konstan. The project began to explore automated collaborative filtering in 1992 but is most well known for its worldwide trial of an automated collaborative filtering system for Usenet news in 1996. Since then the project has expanded its scope to research overall information by filtering solutions, integrating into content-based methods, as well as, improving current collaborative filtering technology.
+Problem Objective :
+Here, we ask you to perform the analysis using the Exploratory Data Analysis technique. You need to find features affecting the ratings of any particular movie and build a model to predict the movie ratings.
+Domain: Entertainment
+
+Analysis Tasks to be performed:	
+
+1.	Import the three datasets
+
+import pandas as pd
+
+pwd
+
+'C:\\Users\\NITHIN\\Documents\\02)Data Science with Python\\Data-Science-with-Python-Project-2'
+
+#Input movies dataset
+
+movies = pd.read_csv("C:\\Users\\NITHIN\\Documents\\02)Data Science with Python\\Data-Science-with-Python-Project-2\\movies.dat", sep="::", names=['MovieID', 'Title', 'Genres'] )
+
+ 
+
+#Read the sample movies dataset
+
+movies.head()
+
+Output
+	MovieID	Title	Genres
+0	1	Toy Story (1995)	Animation|Children's|Comedy
+1	2	Jumanji (1995)	Adventure|Children's|Fantasy
+2	3	Grumpier Old Men (1995)	Comedy|Romance
+3	4	Waiting to Exhale (1995)	Comedy|Drama
+4	5	Father of the Bride Part II (1995)	Comedy
+
+#Input ratings dataset
+
+ratings = pd.read_csv("C:\\Users\\NITHIN\\Documents\\02)Data Science with Python\\Data-Science-with-Python-Project-2\\ratings.dat", sep="::", names=['UserID', 'MovieID', 'Rating', 'Timestamp'] )
+
+#Read the sample ratings dataset
+
+ratings.head()
+ 
+#Input users dataset
+
+users = pd.read_csv("C:\\Users\\NITHIN\\Documents\\02)Data Science with Python\\Data-Science-with-Python-Project-2\\users.dat", sep="::", names=['UserID', 'Gender', 'Age', 'Occupation', 'Zip-code'] )
+
+
+
+
+
+#Read the sample users dataset
+
+users.head()
+
+ 
+‘
+
+2.	Create a new dataset [Master_Data] with the following columns MovieID Title UserID Age Gender Occupation Rating. (Hint: (i) Merge two tables at a time. (ii) Merge the tables using two primary keys MovieID & UserId)
+
+
+#Merge the ratings and users with movieID and UserID
+
+ratings_user = pd.merge(ratings,users, on=['UserID'])
+ratings_movie = pd.merge(ratings,movies, on=['MovieID'])
+
+master_data = pd.merge(ratings_user,ratings_movie,
+                       on=['UserID', 'MovieID', 'Rating'])[['MovieID', 'Title', 'UserID', 'Age', 'Gender', 'Occupation', "Rating"]]
+
+master_data.head()
+
+Output
+	UserID	Gender	Age	Occupation	Zip-code
+0	1	F	1	10	48067
+1	2	M	56	16	70072
+2	3	M	25	15	55117
+3	4	M	45	7	02460
+4	5	M	25	20	55455
+
+#Merge the ratings and users with movieID and UserID
+
+ratings_user = pd.merge(ratings,users, on=['UserID'])
+ratings_movie = pd.merge(ratings,movies, on=['MovieID'])
+
+master_data = pd.merge(ratings_user,ratings_movie,
+                       on=['UserID', 'MovieID', 'Rating'])[['MovieID', 'Title', 'UserID', 'Age', 'Gender', 'Occupation', "Rating"]]
+
+master_data.head()
+
+ 
+3.	Explore the datasets using visual representations (graphs or tables), also include your comments on the following:
+1.	User Age Distribution
+2.	User rating of the movie “Toy Story”
+3.	Top 25 movies by viewership rating
+4.	Find the ratings for all the movies reviewed by for a particular user of user id = 2696
+
+#User age distribution
+
+import matplotlib.pyplot as plt
+
+users['Age'].hist(bins=50)
+plt.xlabel('Age')
+plt.ylabel('Population')
+plt.show
+
+OUTPUT
+
+ 
+#User rating of the movie “Toy Story”
+
+res = master_data[master_data.Title == "Toy Story (1995)"]
+
+plt.plot(res.groupby("Age")["MovieID"].count(),'--bo')
+res.groupby("Age")["MovieID"].count()
+
+
+
+
+
+OUTPUT
+Age
+1     112
+18    448
+25    790
+35    423
+45    143
+50    108
+56     53
+Name: MovieID, dtype: int64
+
+ 
+#Top 25 movies by viewership rating
+
+res = master_data.groupby("Title").size().sort_values(ascending=False)[:25]
+plt.ylabel("Title")
+plt.xlabel("Viewership Count")
+res.plot(kind="barh")
+ #res
+ 
+#Find the ratings for all the movies reviewed by for a particular user of user id = 2696
+
+res = master_data[master_data.UserID == 2696]
+
+plt.scatter(y=res.Title, x=res.Rating)
+
+res
+
+OUTPUT
+
+MovieID	Title	UserID	Age	Gender	Occupation	Rating
+440667	1258	Shining, The (1980)	2696	25	M	7	4
+440668	1270	Back to the Future (1985)	2696	25	M	7	2
+440669	1617	L.A. Confidential (1997)	2696	25	M	7	4
+440670	1625	Game, The (1997)	2696	25	M	7	4
+440671	1644	I Know What You Did Last Summer (1997)	2696	25	M	7	2
+440672	1645	Devil's Advocate, The (1997)	2696	25	M	7	4
+440673	1805	Wild Things (1998)	2696	25	M	7	4
+440674	1892	Perfect Murder, A (1998)	2696	25	M	7	4
+440675	800	Lone Star (1996)	2696	25	M	7	5
+440676	2338	I Still Know What You Did Last Summer (1998)	2696	25	M	7	2
+440677	1711	Midnight in the Garden of Good and Evil (1997)	2696	25	M	7	4
+440678	3176	Talented Mr. Ripley, The (1999)	2696	25	M	7	4
+440679	2389	Psycho (1998)	2696	25	M	7	4
+440680	1589	Cop Land (1997)	2696	25	M	7	3
+440681	2713	Lake Placid (1999)	2696	25	M	7	1
+440682	3386	JFK (1991)	2696	25	M	7	1
+440683	1783	Palmetto (1998)	2696	25	M	7	4
+440684	350	Client, The (1994)	2696	25	M	7	3
+440685	1092	Basic Instinct (1992)	2696	25	M	7	4
+440686	1097	E.T. the Extra-Terrestrial (1982)	2696	25	M	7	3
+ 
+
+•	Feature Engineering:
+            Use column genres:
+1.	Find out all the unique genres (Hint: split the data in column genre making a list and then process the data to find out only the unique categories of genres)
+2.	Create a separate column for each genre category with a one-hot encoding ( 1 and 0) whether or not the movie belongs to that genre. 
+3.	Determine the features affecting the ratings of any particular movie.
+4.	Develop an appropriate model to predict the movie ratings
+
+#Feature Engineering
+
+val = movies.Genres.str.split("|")
+
+res_col = []
+for v in val:
+    for i in v:
+        if i not in res_col:
+            res_col.append(i)
+
+res_col.append("Gender")
+res_col.append("Age")
+res_col.append("Rating")
+
+df = pd.DataFrame(columns=res_col)
+
+res = master_data.merge(movies, on = ['MovieID'], how="left")[["Genres","Rating","Gender", "Age"]]
+
+for index, row in res.head(20000).iterrows():
+    tmp = row.Genres.split("|") 
+    
+    for i in tmp:
+       # print(i)
+        df.loc[index,i] = 1
+        df.loc[index,"Gender"] = res.loc[index,"Gender"]
+        df.loc[index,"Age"] = res.loc[index,"Age"]
+        df.loc[index,"Rating"] = res.loc[index,"Rating"]
+         
+#         var = res.loc[index, "Rating"]
+#         if var == 1:
+#             df.loc[index,"Rating"] = "one" 
+#         elif var == 2:
+#             df.loc[index,"Rating"] = "two"
+#         elif var == 3:
+#             df.loc[index,"Rating"] = "three"
+#         elif var == 4:
+#             df.loc[index,"Rating"] = "four"
+#         else:
+#             df.loc[index,"Rating"] = "five"
+     
+    df.loc[index,df.columns[~df.columns.isin(tmp+["Gender","Rating","Age"])]] = 0
+
+df.head()
+    
+
+#df.loc[i,"Animation"] = 1
+
+#df
+
+
+
+
+
+
+
+
+
+
+OUTPUT:
+ 
+from sklearn import datasets 
+from sklearn.metrics import confusion_matrix 
+from sklearn.model_selection import train_test_split 
+from sklearn.preprocessing import LabelEncoder
+
+X = df[df.columns[~df.columns.isin(["Rating"])]]
+y = df.Rating
+
+# dividing X, y into train and test data 
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state = 0) 
+
+number = LabelEncoder()
+X_train.Gender = number.fit_transform(X_train["Gender"].astype("str"))
+X_test.Gender = number.fit_transform(X_test["Gender"].astype("str"))
+y_train = number.fit_transform(y_train.astype("int"))
+y_test = number.fit_transform(y_test.astype("int"))
+
+ 
+#SVM
+
+from sklearn.svm import SVC 
+svm_model_linear = SVC(kernel = 'linear', C = 1).fit(X_train, y_train) 
+svm_predictions = svm_model_linear.predict(X_test) 
+  
+
+# model accuracy for X_test   
+accuracy = svm_model_linear.score(X_test, y_test) 
+  
+# creating a confusion matrix 
+cm = confusion_matrix(y_test, svm_predictions) 
+accuracy
+#cm
+
+0.34
+
+#KNN
+
+from sklearn.neighbors import KNeighborsClassifier 
+knn = KNeighborsClassifier(n_neighbors = 7).fit(X_train, y_train) 
+  
+# accuracy on X_test 
+accuracy = knn.score(X_test, y_test) 
+  
+# creating a confusion matrix 
+knn_predictions = knn.predict(X_test)  
+cm = confusion_matrix(y_test, knn_predictions) 
+
+accuracy
+
+0.3102
+
+#Naive Bayes classifier 
+
+from sklearn.naive_bayes import GaussianNB 
+gnb = GaussianNB().fit(X_train, y_train) 
+gnb_predictions = gnb.predict(X_test) 
+  
+# accuracy on X_test 
+accuracy = gnb.score(X_test, y_test)  
+  
+# creating a confusion matrix 
+cm = confusion_matrix(y_test, gnb_predictions) 
+
+accuracy
+0.2788
+
+
+
+
+
+
